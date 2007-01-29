@@ -1,0 +1,16 @@
+Build.PL
+Changes
+lib/Module/Build/PM_Filter.pm
+debian/changelog
+debian/compat
+debian/control
+debian/files
+debian/rules
+MANIFEST
+META.yml			# Will be created by "make dist"
+README
+t/00-load.t
+t/module-build-pm-filter.t
+t/pod-coverage.t
+t/pod.t
+TODO
