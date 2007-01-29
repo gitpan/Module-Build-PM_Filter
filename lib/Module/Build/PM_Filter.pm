@@ -6,7 +6,7 @@ use Carp;
 use utf8;
 use English;
 
-our $VERSION = '0.5';
+our $VERSION = '0.6';
 
 sub process_pm_files {
     my  $self   =   shift;
@@ -177,7 +177,7 @@ Copyright (c) 2005 "Víctor Moral" <victor@taquiones.net>
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
 License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) any later version.
+version 2.1 of the License.
 
 
 This library is distributed in the hope that it will be useful,
