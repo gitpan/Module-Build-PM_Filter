@@ -28,7 +28,7 @@ build-stamp:
 
 	# Add commands to compile the package here
 	$(PERL) Build.PL installdirs=vendor
-	OPTIMIZE="-Wall -O2 -g" $(PERL) Build
+	$(PERL) Build 
 
 	touch build-stamp
 
@@ -37,8 +37,7 @@ clean:
 	dh_testroot
 
 	# Add commands to clean up after the build process here
-	make distclean
-	# [ ! -f Build ] || $(PERL) Build distclean
+	[ ! -f Build ] || $(PERL) Build distclean
 
 	dh_clean build-stamp install-stamp
 
@@ -49,8 +48,8 @@ install-stamp:
 	dh_clean -k
 
 	# Add commands to install the package into debian/$PACKAGE_NAME here
-	make test
-	make install DESTDIR=$(TMP)
+	$(PERL) Build test
+	$(PERL) Build install destdir=$(TMP)
 
 	touch install-stamp
 

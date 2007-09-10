@@ -1,0 +1,9 @@
+-stamp$
+\.orig$
+\.bak$
+\.swp$
+\.svn
+_build
+blib
+Build$
+\.ptkdb$

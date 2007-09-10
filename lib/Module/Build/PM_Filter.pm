@@ -4,16 +4,16 @@ use strict;
 use warnings;
 use Carp;
 use utf8;
-use English;
+use English qw(-no_match_vars);
 
-our $VERSION = '0.6';
+our $VERSION = '0.7';
 
 sub process_pm_files {
     my  $self   =   shift;
     my  $ext    =   shift;
 
     ### is there a pm_filter file ? ...
-    if (not -x q(pm_filter)) {
+    if ($self->_check_pm_filter_file( "pm_filter" )) {
         ### dispatch to super method ...
         return $self->SUPER::process_pm_files( $ext );
     }
@@ -39,7 +39,7 @@ sub process_script_files {
     my  $self   =   shift;
 
     ### is there a pm_filter file ? ...
-    if (not -x q(pm_filter)) {
+    if ($self->_check_pm_filter_file( "pm_filter" )) {
         ### dispatch to super method ...
         return $self->SUPER::process_script_files( );
     }
@@ -54,7 +54,8 @@ sub process_script_files {
     File::Path::mkpath( $script_dir );
 
     foreach my $file (keys %$files) {
-        if (my $result = $self->copy_if_modified($file, $script_dir, 'flatten')) {
+        if (my $result = $self->copy_if_modified($file, 
+                            $script_dir,'flatten')) {
             $self->_do_filter( $file, $result );
             $self->fix_shebang_line($result);
             $self->make_executable($result);
@@ -71,6 +72,48 @@ sub _do_filter {
     if (not $self->do_system($cmd)) {
         croak "pm_filter failed: ${ERRNO}";
     }                
+
+    return;
+}
+
+sub _check_pm_filter_file {
+    my  $self       =   shift;
+    my  $file       =   shift;
+
+    if (-e $file) {
+        if (not -x $file) {
+            croak "pm_filter exists but is not executable";
+        }
+    }
+
+    return 1;
+}
+
+### CLASS METHOD ###
+# Usage         : internal use only 
+# Purpose       : Verify that a pm_filter exists and it's executable in the
+#               : distribution directory.
+# Returns       : Some of the inherited method
+# Parameters    : 
+# Throws        : no exceptions
+# Commments     : none
+# See also      : n/a
+
+sub ACTION_distdir {
+    my  $self   =   shift;
+
+    # dispatch to up
+    $self->SUPER::ACTION_distdir(@_);
+
+    # build the distribution path 
+    my $dir     = $self->dist_dir();
+    my $filter  = "${dir}/pm_filter";
+
+    # if exists and is not executable 
+    if (-e $filter and not -x $filter ) {
+        # make executable using a portable function
+        $self->make_executable( $filter );
+    }
 
     return;
 }
@@ -92,12 +135,12 @@ In a Build.PL file you must use this module in place of the L<Module::Build>:
                 module_name         =>  'MyIkiWiki::Tools',
                 license             =>  q(gpl),
                 dist_version        =>  '0.2',
-                dist_author         =>  'Víctor Moral <victor@taquiones.net>',
+                dist_author         =>  'Victor Moral <victor@taquiones.net>',
                 );
 
     $build->create_build_script();
 
-In the package directory build a pm_filter file like this:
+In the package directory create a pm_filter file like this:
 
     #!/usr/bin/perl -pl
 
@@ -132,15 +175,20 @@ final location.
 
 =head2 process_pm_files( )
 
-This method looks for a file named 'pm_filter' in the current work directory and
-executes it; his standard input is redirected to the source pm and his standard
-output is redirected to a temp file. 
+This method looks for a file named 'pm_filter' in the current work directory
+and executes it; his standard input is redirected to the source pm and his
+standard output is redirected to a temp file. 
 
 The temp file is finally installed on the F<blib/> tree.
 
 =head2 process_script_files( )
 
 This method finds, filters and install the executable files in the package.
+
+=head2 ACTION_distdir( )
+
+This method performs the 'distdir' action and make the pm_filter file in the
+distribution directory is executable. 
 
 =head1 DIAGNOSTICS
 
@@ -149,6 +197,10 @@ This method finds, filters and install the executable files in the package.
 =item pm_filter failed ...
 
 croak with this text when it could not run the pm_filter program.
+
+=item pm_filter not executable ...
+
+croak with this text when exists a pm_filter file and it not executable.
 
 =back
 
@@ -168,7 +220,7 @@ Patches are welcome.
 
 =head1 AUTHOR
 
-Víctor Moral <victor@taquiones.net>
+Victor Moral <victor@taquiones.net>
 
 =head1 LICENCE AND COPYRIGHT
 
