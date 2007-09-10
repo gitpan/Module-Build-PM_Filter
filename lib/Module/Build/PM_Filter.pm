@@ -6,14 +6,14 @@ use Carp;
 use utf8;
 use English qw(-no_match_vars);
 
-our $VERSION = '0.7';
+our $VERSION = '0.8';
 
 sub process_pm_files {
     my  $self   =   shift;
     my  $ext    =   shift;
 
     ### is there a pm_filter file ? ...
-    if ($self->_check_pm_filter_file( "pm_filter" )) {
+    if (not $self->_check_pm_filter_file( "pm_filter" )) {
         ### dispatch to super method ...
         return $self->SUPER::process_pm_files( $ext );
     }
@@ -39,7 +39,7 @@ sub process_script_files {
     my  $self   =   shift;
 
     ### is there a pm_filter file ? ...
-    if ($self->_check_pm_filter_file( "pm_filter" )) {
+    if (not $self->_check_pm_filter_file( "pm_filter" )) {
         ### dispatch to super method ...
         return $self->SUPER::process_script_files( );
     }
@@ -75,6 +75,16 @@ sub _do_filter {
 
     return;
 }
+
+### INTERNAL UTILITY ###
+# Usage         : _check_pm_filter_file( $pm_filter_path )
+# Purpose       : Check if there is a valid pm_filter 
+# Returns       : 0 Not valid 
+#               : 1 Valid 
+# Parameters    : - File path 
+# Throws        : no exceptions
+# Commments     : none
+# See also      : n/a
 
 sub _check_pm_filter_file {
     my  $self       =   shift;
