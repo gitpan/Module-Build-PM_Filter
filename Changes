@@ -1,3 +1,11 @@
+libmodule-build-pm-filter-perl (0.9.1) unstable; urgency=low
+
+  * Fixed a bug in the t/module-build-pm-filter.t script. The test failed if
+    the distribution doesn't contain a pm_filter file with execution
+    permissions. 
+
+ -- Victor Moral <victor@taquiones.net>  Thu, 13 Sep 2007 09:39:49 +0200
+
 libmodule-build-pm-filter-perl (0.9) unstable; urgency=low
 
   * Add support for the debian/rules file in the distdir action.

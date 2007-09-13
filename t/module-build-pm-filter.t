@@ -13,6 +13,14 @@ use Module::Build::PM_Filter;
 # change to the examples directory
 chdir q(examples);
 
+# some initial dispositions
+foreach my $script qw(pm_filter debian/rules) {
+    if (-e $script and not -x $script) {    
+        chmod 0544, $script || 
+            die "could not change permissions on ${script}";
+    }
+}
+
 # create a class from the Build.PL file in the current directory, and do the
 # first action: build 
 my $class = q(Module::Build::PM_Filter);
