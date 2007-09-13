@@ -1,5 +1,10 @@
 #!/usr/bin/perl
 
+use strict;
+use warnings;
+use Carp;
+use IO::File;
+
 use lib qw(lib);
 
 use Test::More qw(no_plan);
@@ -7,44 +12,53 @@ use Module::Build::PM_Filter;
 
 # change to the examples directory
 chdir q(examples);
+
+# create a class from the Build.PL file in the current directory, and do the
+# first action: build 
 my $class = q(Module::Build::PM_Filter);
-
-my $builder = $class->new(
-    module_name         => 'MyModule',
-    license             => 'gpl',
-    dist_author         => 'Víctor Moral <victor@taquiones.net>',
-    dist_version_from   => 'lib/MyModule.pm',
-    requires => {
-        'Test::More'                =>  0,
-        'Module::Build::PM_Filter'  =>  0,
-    },
-    add_to_cleanup      => [ 'MyModule-*' ],
-);
-
+my $builder = $class->new_from_context( verbose => 0 );
 isa_ok($builder, $class);
 
-#$builder->create_build_script();
-#
-#ok(-e q(Build.PL), "creating the Build.PL script");
-#
-#SKIP: {
-#    eval { use Module::Build::PM_Filter 0.7; };
-#
-#    skip "old version of Module::Build::PM_Filter" if $@;
-#
-#
-#
-#    $builder->dispatch('build');
-#
-#    ok(-e q(Build), "building and filtering the package");
-#
-#    #ok($builder->dispatch('test'), 'test the package' );
-#
-#    ok($builder->dispatch('disttest'), 'test the distribution' );
-#
-#    $builder->dispatch('distclean');
-#
-#    my $all_clean = not -e $builder->dist_dir();
-#
-#    ok($all_clean, "distribution cleaning");
-#}
+# check the existence of a Build script
+ok(-e q(Build), "Build script created" );
+
+#   build the package 
+$builder->dispatch( 'build' );
+
+# check the existence of a blib version of the module 
+my $bmodule = q(blib/lib/MyModule.pm);
+ok(-e $bmodule, "build action completed");
+
+# and verify that the pm_filter is working
+ok( _search_pm_filter_string( $bmodule ), "pm_filter in build action");
+
+# make the distribution directory
+$builder->dispatch('distdir');
+my $distdir = $builder->dist_dir();
+ok(-d $distdir, "distdir action completed");
+ok(-x "${distdir}/pm_filter", "pm_filter is executable");
+ok(-x "${distdir}/debian/rules", "debian/rules is executable");
+
+# final clean
+$builder->dispatch('distclean');
+
+sub _search_pm_filter_string {
+    my  $file   =   shift;
+    my  $found  =   0;
+
+    if (my $pf = IO::File->new( $file, "<" )) {
+        while (my $line = <$pf>) {
+            if ($line =~ m{PM_Filter\s+is\s+working}xms) {
+                $found = 1;
+                last;
+            }
+        }
+        $pf->close();
+    }
+    else {
+        croak "could not open ${file} for reading";
+    }
+
+    return $found;
+}
+

@@ -22,3 +22,4 @@ examples/MANIFEST
 examples/META.yml
 examples/Build.PL
 examples/MANIFEST.SKIP
+examples/debian/rules

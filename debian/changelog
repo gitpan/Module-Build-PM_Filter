@@ -1,3 +1,11 @@
+libmodule-build-pm-filter-perl (0.9) unstable; urgency=low
+
+  * Add support for the debian/rules file in the distdir action.
+  * Completed the main test.
+  * Minor changes in the code structure.
+
+ -- Victor Moral <victor@taquiones.net>  Wed, 12 Sep 2007 12:15:08 +0200
+
 libmodule-build-pm-filter-perl (0.8) unstable; urgency=low
 
   * Fixed an stupid bug with the pm_filter file

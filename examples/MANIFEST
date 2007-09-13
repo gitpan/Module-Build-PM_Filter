@@ -3,3 +3,4 @@ lib/MyModule.pm
 MANIFEST			This list of files
 pm_filter
 META.yml
+debian/rules

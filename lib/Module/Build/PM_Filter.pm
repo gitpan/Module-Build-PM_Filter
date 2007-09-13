@@ -6,7 +6,7 @@ use Carp;
 use utf8;
 use English qw(-no_match_vars);
 
-our $VERSION = '0.8';
+our $VERSION = '0.9';
 
 sub process_pm_files {
     my  $self   =   shift;
@@ -47,12 +47,13 @@ sub process_script_files {
     # find script files 
     my  $files  =   $self->find_script_files;
 
-    # do nothing if not found anything
+    # do nothing if not files
     return if not keys( %{ $files });
 
     my $script_dir = File::Spec->catdir($self->blib, 'script');
     File::Path::mkpath( $script_dir );
 
+    # filter every script and make executable
     foreach my $file (keys %$files) {
         if (my $result = $self->copy_if_modified($file, 
                             $script_dir,'flatten')) {
@@ -117,12 +118,21 @@ sub ACTION_distdir {
 
     # build the distribution path 
     my $dir     = $self->dist_dir();
-    my $filter  = "${dir}/pm_filter";
 
-    # if exists and is not executable 
-    if (-e $filter and not -x $filter ) {
-        # make executable using a portable function
-        $self->make_executable( $filter );
+    # verify that the next files are executables ...
+    $self->_make_exec( "${dir}/pm_filter"       );
+    $self->_make_exec( "${dir}/debian/rules"    );
+
+    return;
+}
+
+sub _make_exec {
+    my  $self   =   shift;
+    my  $file   =   shift;
+
+    # if the file exists and is not executable ...
+    if (-e $file and not -x $file) {
+        $self->make_executable( $file );
     }
 
     return;
@@ -172,14 +182,19 @@ Then in a script from package insert a line like this:
 
 =head1 DESCRIPTION
 
-This module provides a Module::Build compatible class and adds a filter for pm
-files. The filter could be used to replace Perl source from development
-environment to production.
+This module provides a Module::Build compatible class and adds a filter for
+F<.pm>, F<.pl> and script files. The filter could be used to replace Perl
+source from development environment to production, or to remove debug
+sentences.
 
 In the debug phase we can play with the application and modules without
 mattering to us where the library are; when we build the package for
 distribution, the modules and the scripts will contain the correct path in the
 final location.
+
+In addition the module makes sure that the archives F<pm_filter> and
+F<debian/rules> are copied in the distribution directory with the suitable
+permissions.
 
 =head1 SUBRUTINES/METHODS
 
@@ -197,8 +212,8 @@ This method finds, filters and install the executable files in the package.
 
 =head2 ACTION_distdir( )
 
-This method performs the 'distdir' action and make the pm_filter file in the
-distribution directory is executable. 
+This method performs the 'distdir' action and make the pm_filter and
+debian/rules files in the distribution directory is executable. 
 
 =head1 DIAGNOSTICS
 
@@ -234,7 +249,7 @@ Victor Moral <victor@taquiones.net>
 
 =head1 LICENCE AND COPYRIGHT
 
-Copyright (c) 2005 "Víctor Moral" <victor@taquiones.net>
+Copyright (c) 2005 "Victor Moral" <victor@taquiones.net>
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
