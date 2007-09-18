@@ -6,7 +6,7 @@ use Carp;
 use utf8;
 use English qw(-no_match_vars);
 
-our $VERSION = '0.9.2';
+our $VERSION = '1.0.0';
 
 sub process_pm_files {
     my  $self   =   shift;

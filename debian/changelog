@@ -1,6 +1,13 @@
+libmodule-build-pm-filter-perl (1.0.0) unstable; urgency=low
+
+  * Promoted to a new version because a error in the PAUSE indexer.
+
+ -- Victor Moral <victor@taquiones.net>  Tue, 18 Sep 2007 09:48:40 +0200
+
 libmodule-build-pm-filter-perl (0.9.2) unstable; urgency=low
 
-  * Changes
+  * Fix a error with the t/module-build-pm-filter script. Now it uses a
+    temp directory for its work.
 
  -- Victor Moral <victor@taquiones.net>  Mon, 17 Sep 2007 18:54:48 +0200
 
