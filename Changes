@@ -1,3 +1,12 @@
+libmodule-build-pm-filter-perl (1.1) unstable; urgency=low
+
+  * Adopt the version module for the package.
+  * Apply the Perl::Critic tests and done minor changes on the source code.
+  * Use the File::Copy::Recursive module because the "cp -a" command doesn't
+    work in some systems. 
+
+ -- Victor Moral <victor@taquiones.net>  Thu, 20 Sep 2007 12:17:57 +0200
+
 libmodule-build-pm-filter-perl (1.0.0) unstable; urgency=low
 
   * Promoted to a new version because a error in the PAUSE indexer.

@@ -6,7 +6,7 @@ use Carp;
 use utf8;
 use English qw(-no_match_vars);
 
-our $VERSION = '1.0.0';
+use version; our $VERSION = qv(1.1);
 
 sub process_pm_files {
     my  $self   =   shift;
@@ -212,8 +212,8 @@ This method finds, filters and install the executable files in the package.
 
 =head2 ACTION_distdir( )
 
-This method performs the 'distdir' action and make the pm_filter and
-debian/rules files in the distribution directory is executable. 
+This method performs the 'distdir' action and change the permissions of the
+pm_filter and debian/rules files in the distribution to executable.
 
 =head1 DIAGNOSTICS
 
@@ -234,6 +234,8 @@ croak with this text when exists a pm_filter file and it not executable.
 =over 
 
 =item Module::Build
+
+=item File::Copy::Recursive
 
 =back
 

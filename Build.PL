@@ -17,8 +17,9 @@ my $builder = Module::Build->new(
     dist_author         => 'Victor Moral <victor@taquiones.net>',
     dist_version_from   => 'lib/Module/Build/PM_Filter.pm',
     requires => {
-        'Test::More'    =>  0,
-        'Module::Build' =>  0,
+        'Test::More'                =>  0,
+        'Module::Build'             =>  0,
+        'File::Copy::Recursive'     =>  0,
     },
     add_to_cleanup      => [ 
             'Module-Build-PM_Filter-*',

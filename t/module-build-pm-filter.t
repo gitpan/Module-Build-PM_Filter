@@ -8,7 +8,9 @@ use IO::File;
 use lib qw(lib);
 
 use File::Temp qw(tempdir);
+use File::Copy::Recursive qw(dircopy);
 use Test::More qw(no_plan);
+
 use Module::Build::PM_Filter;
 
 # create a temp directory
@@ -18,17 +20,16 @@ SKIP: {
     skip "could not use a temp directory" unless $output_dir;
 
     # make a copy of the examples directory contents ...
-    system("cp -a examples/* ${output_dir}") == 0 || 
-        die "could not copy the examples directory to a ${output_dir}";
+    dircopy( q(examples), $output_dir ) or 
+        skip "could not copy the examples directory to ${output_dir}";
 
     # change to the temp dir ...
     chdir $output_dir;
 
-
     # some initial dispositions
     foreach my $script qw(pm_filter debian/rules) {
         if (-e $script and not -x $script) {    
-            chmod 0544, $script || 
+            chmod oct(544), $script || 
                 die "could not change permissions on ${script}";
         }
     }
