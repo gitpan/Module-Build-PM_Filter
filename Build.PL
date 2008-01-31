@@ -24,6 +24,7 @@ my $builder = Module::Build->new(
     add_to_cleanup      => [ 
             'Module-Build-PM_Filter-*',
             'examples/MyModule-*',
+            'libmodule-build-pm-filter-perl*',
             ],
 );
 

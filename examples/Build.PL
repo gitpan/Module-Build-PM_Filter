@@ -8,6 +8,7 @@ my $builder = Module::Build::PM_Filter->new(
     module_name         => 'MyModule',
     license             => 'gpl',
     dist_author         => 'Víctor Moral <victor@taquiones.net>',
+    dist_abstract       => 'This is just a sample distribution',
     dist_version_from   => 'lib/MyModule.pm',
     requires => {
         'Test::More'                =>  0,

@@ -1,3 +1,16 @@
+libmodule-build-pm-filter-perl (1.2) unstable; urgency=medium
+
+  * Update the Debian standards-version to the last version.
+  * Added in the debian/rules the parameter create_packlist=0 in the install
+    stage.
+  * Now the module uses a temporal file previous to the installation into the
+    blib directory, because the previous version fails when the program could
+    not write in the blib directory.
+  * Minor changes done to the source to conform the Perl::Critic evaluation.
+  * Added missing sections to the POD documentation.
+   
+ -- Victor Moral <victor@taquiones.net>  Thu, 31 Jan 2008 10:53:27 +0100
+
 libmodule-build-pm-filter-perl (1.1) unstable; urgency=low
 
   * Adopt the version module for the package.

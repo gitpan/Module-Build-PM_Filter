@@ -5,41 +5,58 @@ use warnings;
 use Carp;
 use utf8;
 use English qw(-no_match_vars);
+use File::Temp;
+use File::Path;
+use File::Basename qw(dirname);
 
-use version; our $VERSION = qv(1.1);
+use version; our $VERSION = qv(1.2);
 
 sub process_pm_files {
     my  $self   =   shift;
     my  $ext    =   shift;
 
     ### is there a pm_filter file ? ...
-    if (not $self->_check_pm_filter_file( "pm_filter" )) {
+    if (not $self->_check_pm_filter_file( q(pm_filter) )) {
         ### dispatch to super method ...
         return $self->SUPER::process_pm_files( $ext );
     }
 
+    ### build the install directory
+    my $target_dir = $self->blib;
+    if (not -e $target_dir) {
+        File::Path::mkpath( $target_dir );
+    }
+
+    ### build the method name for finding files according to the extension
     my $method = "find_${ext}_files";
+
+    ### build a hash with module names and targets. 
     my $files = $self->can($method) ? $self->$method() :
                 $self->_find_file_by_type($ext,  'lib');
 
-    ### the method for find pm files is: $method
-    ### and the pm files are: $files
+    ### only filter and install the module if it's not updated
+    while (my ($file, $dest) = each %{ $files }) {
+        my $derived = File::Spec->catfile($target_dir, $dest);
 
-    while (my ($file, $dest) = each %$files) {
-        ### first copy the source to the target ...
-        if (my $target = $self->copy_if_modified( from => $file,
-                         to =>  File::Spec->catfile($self->blib, $dest))) {
-            ### do filtering ...
-            $self->_do_filter( $file, $target );
+        if (not $self->up_to_date( $file, $derived )) {
+
+            ### filter to a temporary file
+            my $temp_source = File::Temp->new();
+            $self->_do_filter( $file, $temp_source );
+
+            ### and install into the distribution directory
+            $self->copy_if_modified( from => $temp_source, to => $derived );
         }
     }
+
+    return;
 }
 
 sub process_script_files {
     my  $self   =   shift;
 
     ### is there a pm_filter file ? ...
-    if (not $self->_check_pm_filter_file( "pm_filter" )) {
+    if (not $self->_check_pm_filter_file( q(pm_filter) )) {
         ### dispatch to super method ...
         return $self->SUPER::process_script_files( );
     }
@@ -48,31 +65,42 @@ sub process_script_files {
     my  $files  =   $self->find_script_files;
 
     # do nothing if not files
-    return if not keys( %{ $files });
+    return if not keys %{ $files };
 
+    # make the install directory
     my $script_dir = File::Spec->catdir($self->blib, 'script');
-    File::Path::mkpath( $script_dir );
+    if (not -e $script_dir) {
+        File::Path::mkpath( $script_dir );
+    }
 
     # filter every script and make executable
-    foreach my $file (keys %$files) {
-        if (my $result = $self->copy_if_modified($file, 
-                            $script_dir,'flatten')) {
-            $self->_do_filter( $file, $result );
-            $self->fix_shebang_line($result);
-            $self->make_executable($result);
+    foreach my $file (keys %{ $files }) {
+        # Isn't it already fresh ?
+        if (not $self->up_to_date( $file, $script_dir)) {
+            my $tmp_from = File::Temp->new();
+
+            # use a temporary file for filter ...
+            $self->_do_filter( $file, $tmp_from );
+            $self->fix_shebang_line( $tmp_from );
+            $self->make_executable( $tmp_from );
+
+            # ... previous to the canonical installation
+            $self->copy_if_modified( from => $tmp_from, to_dir => $script_dir );
         }
-    }   
+    }
+
+    return;
 }
 
 sub _do_filter {
     my  $self       =   shift;
     my  $source     =   shift;
     my  $target     =   shift;
-    my  $cmd        =   sprintf("./pm_filter < %s > %s", $source, $target);
+    my  $cmd        =   sprintf './pm_filter < %s > %s', $source, $target;
 
     if (not $self->do_system($cmd)) {
         croak "pm_filter failed: ${ERRNO}";
-    }                
+    }
 
     return;
 }
@@ -93,7 +121,7 @@ sub _check_pm_filter_file {
 
     if (-e $file) {
         if (not -x $file) {
-            croak "pm_filter exists but is not executable";
+            croak q(pm_filter exists but is not executable);
         }
     }
 
@@ -111,10 +139,10 @@ sub _check_pm_filter_file {
 # See also      : n/a
 
 sub ACTION_distdir {
-    my  $self   =   shift;
+    my  ($self, @params)  =   @_;
 
     # dispatch to up
-    $self->SUPER::ACTION_distdir(@_);
+    $self->SUPER::ACTION_distdir(@params);
 
     # build the distribution path 
     my $dir     = $self->dist_dir();
@@ -144,6 +172,10 @@ __END__
 =head1 NAME
 
 Module::Build::PM_Filter - Add a PM_Filter feature to Module::Build
+
+=head1 VERSION
+
+This documentation refers to Module::Build::PM_Filter version 1.2
 
 =head1 SYNOPSIS
 
@@ -196,7 +228,7 @@ In addition the module makes sure that the archives F<pm_filter> and
 F<debian/rules> are copied in the distribution directory with the suitable
 permissions.
 
-=head1 SUBRUTINES/METHODS
+=head1 SUBROUTINES/METHODS
 
 =head2 process_pm_files( )
 
@@ -229,6 +261,10 @@ croak with this text when exists a pm_filter file and it not executable.
 
 =back
 
+=head1 CONFIGURATION AND ENVIRONMENT 
+
+The location of the pm_filter script must be the current work directory.
+
 =head1 DEPENDENCIES
 
 =over 
@@ -238,6 +274,14 @@ croak with this text when exists a pm_filter file and it not executable.
 =item File::Copy::Recursive
 
 =back
+
+=head1 INCOMPATIBILITIES
+
+=over
+
+=item L<ExtUtils::MakeMaker>
+
+=back 
 
 =head1 BUGS AND LIMITATIONS
 
@@ -249,9 +293,9 @@ Patches are welcome.
 
 Victor Moral <victor@taquiones.net>
 
-=head1 LICENCE AND COPYRIGHT
+=head1 LICENSE AND COPYRIGHT
 
-Copyright (c) 2005 "Victor Moral" <victor@taquiones.net>
+Copyright (c) 2008 "Victor Moral" <victor@taquiones.net>
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
