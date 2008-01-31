@@ -1,3 +1,9 @@
+libmodule-build-pm-filter-perl (1.2.1) unstable; urgency=low
+
+  * Used expresions instead blocks in the eval sentences on two test scripts.
+
+ -- Victor Moral <victor@taquiones.net>  Thu, 31 Jan 2008 16:24:44 +0100
+
 libmodule-build-pm-filter-perl (1.2) unstable; urgency=medium
 
   * Update the Debian standards-version to the last version.
