@@ -9,7 +9,7 @@ use File::Temp;
 use File::Path;
 use File::Basename qw(dirname);
 
-use version; our $VERSION = qv(1.2.1);
+use version; our $VERSION = qv(1.21);
 
 sub process_pm_files {
     my  $self   =   shift;

@@ -1,8 +1,8 @@
-libmodule-build-pm-filter-perl (1.2.1) unstable; urgency=low
+libmodule-build-pm-filter-perl (1.21) unstable; urgency=low
 
   * Used expresions instead blocks in the eval sentences on two test scripts.
 
- -- Victor Moral <victor@taquiones.net>  Thu, 31 Jan 2008 16:24:44 +0100
+ -- Victor Moral <victor@taquiones.net>  Fri, 01 Feb 2008 08:21:56 +0100
 
 libmodule-build-pm-filter-perl (1.2) unstable; urgency=medium
 
